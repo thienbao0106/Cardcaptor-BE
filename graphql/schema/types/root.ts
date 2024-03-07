@@ -4,6 +4,7 @@ const rootQueryType: String = `
     }
     type RootMutation {
         addCard(cardInput: CardInput): Card
+        scrapData(url: String!): Boolean
     }
 
     
