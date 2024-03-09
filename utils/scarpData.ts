@@ -1,6 +1,7 @@
 import puppeteer from "puppeteer";
+import { Card, Skill } from "../types/card";
 
-export const scarpWiki = async (url: string) => {
+export const scarpWiki = async (url: string): Promise<Card> => {
   try {
     const browser = await puppeteer.launch({
       headless: false,
@@ -18,7 +19,7 @@ export const scarpWiki = async (url: string) => {
       const appears = document.querySelectorAll(".infobox > tbody > tr");
       // Select all h2 element
       const headerElements = document.querySelectorAll("h2");
-      let skills = [];
+      let skills: Skill[] = [];
       if (!title || !description || !appears || !headerElements)
         throw new Error("Can't handle this url");
 
@@ -31,13 +32,14 @@ export const scarpWiki = async (url: string) => {
       for (let i = 0; i < headerElements.length; i++) {
         let header: any = headerElements[i];
         // Check if the h2 element contains a span with the specific ID
-        let specificSpan1 = header.querySelector("span#Magic_and_Abilities");
-        if (specificSpan1 !== null) {
+        let specificSpan = header.querySelector("span#Magic_and_Abilities");
+        if (specificSpan !== null) {
           // If the specific span is found, log the text content of the h2 and break the loop
           while (header.nextElementSibling) {
             // If the sibling is a paragraph, log its text content
             if (header.nextElementSibling.tagName === "P") {
-              const data = header.nextElementSibling.textContent.split(":");
+              const data: string[] =
+                header.nextElementSibling.textContent.split(":");
               skills.push({
                 name: data[0],
                 description: data[1],
@@ -51,10 +53,9 @@ export const scarpWiki = async (url: string) => {
           break;
         }
       }
-
-      return {
-        title: title.textContent,
-        description: description.textContent?.replace("\n", ""),
+      const result: Card = {
+        name: title.textContent || "",
+        description: description.textContent?.replace("\n", "") || "",
         skills,
         appears: {
           captured: {
@@ -67,6 +68,7 @@ export const scarpWiki = async (url: string) => {
           },
         },
       };
+      return result;
     });
     await browser.close();
     return data;
