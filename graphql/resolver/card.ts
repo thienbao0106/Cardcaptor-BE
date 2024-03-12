@@ -1,6 +1,6 @@
-import { transformCard } from "../../utils/card";
+import { transferModel } from "../../utils/transform";
 import Card from "../../models/card";
-import { scarpWiki } from "../../utils/scarpData";
+import { scarpCardData } from "../../utils/card";
 
 export const cardResolvers = {
   cards: async ({ keyword }: any) => {
@@ -13,7 +13,7 @@ export const cardResolvers = {
       });
       console.log(result);
       return result.map((card: any) => {
-        return transformCard(card);
+        return transferModel(card);
       });
     } catch (error) {
       throw error;
@@ -31,7 +31,7 @@ export const cardResolvers = {
         updated_at: date,
       });
       await card.save();
-      return transformCard(card);
+      return transferModel(card);
     } catch (error) {
       throw error;
     }
@@ -40,7 +40,7 @@ export const cardResolvers = {
     try {
       const result = await Card.findById(id);
       if (!result) throw new Error("Can't find this card!");
-      return transformCard(result);
+      return transferModel(result);
     } catch (error) {
       throw error;
     }
@@ -62,23 +62,25 @@ export const cardResolvers = {
         ...updatedCard,
         updated_at: date,
       });
-      return transformCard(result);
+      return transferModel(result);
     } catch (error) {
       throw error;
     }
   },
-  scrapData: async ({ url }: any) => {
+  scrapCardData: async ({ url }: any) => {
     try {
       const date = Date.parse(new Date().toLocaleString());
-      const { name, description } = await scarpWiki(url);
+      const { name, description, skills, appears } = await scarpCardData(url);
       const card = new Card({
         name,
         description,
         created_at: date,
         updated_at: date,
+        skills,
+        appears,
       });
       await card.save();
-      return transformCard(card);
+      return transferModel(card);
     } catch (error) {
       throw error;
     }
